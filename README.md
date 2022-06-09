@@ -1,2 +1,2 @@
 # This is a student record system written in C
-# Test push
+# It stores data in a binary file

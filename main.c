@@ -4,66 +4,89 @@
 #include <string.h>
 
 
+//MACRO TO DEFINE IMPORTANT LIMITS
+#define MAX_Y  2010
+#define MIN_Y  1990
+#define MAX_USERNAME 30
+#define MAX_PASSWORD  20
+#define FILE_NAME  "StudentRecordSystem.bin"
+#define MAX_FIRST_NAME 50
+#define MAX_LAST_NAME 50
+#define MAX_ADDRESS 300
+#define FILE_HEADER_SIZE  sizeof(file_header)
 
-// common macros
-#define MAX_Y  2004
-#define MIN_Y  2001
-#define MAX_USER 40
-#define MAX_PASS  30
-#define FILE_NAME  "studentRecordSystem.bin"
-#define MAX_FNAME 50
-#define MAX_LNAME 50
-#define MAX_STUDENT_ADDRESS 300
-#define FILE_HEADER_SIZE  sizeof(file_head)
 
 
-//structure to store date
-typedef struct{
+//date
+typedef struct
+{
     int yyyy;
     int mm;
     int dd;
 } date;
 
 
-typedef struct{
-    char username[MAX_USER];
-    char password[MAX_PASS];
-} file_head;
+//file header
+typedef struct
+{
+    char username[MAX_USERNAME];
+    char password[MAX_PASSWORD];
+} file_header;
 
 
-//Elements of structure
-typedef struct{
-    unsigned int student_id; // declare the integer data type
-    char first_name[MAX_FNAME];// declare the charecter data type
-    char last_name[MAX_LNAME];// declare the character data type
-    char student_address[MAX_STUDENT_ADDRESS];// declare the character data type
-     studentJoiningDate;// declare the integer data type
+
+//student info structure
+typedef struct
+{
+    unsigned int student_id;
+    char first_name[MAX_FIRST_NAME];
+    char last_name[MAX_LAST_NAME];
+    char address[MAX_ADDRESS];
+    date joining_date;
 } student_info;
-//Align the message
-void printMessageCenter(const char* message)
+
+
+
+
+//top message
+void center_message(const char* message)
 {
     int len =0;
-    int pos = 0;
-    //calculate how many space need to print
+    int posn = 0;
+
+    //calculates req. no. of spaces
     len = (78 - strlen(message))/2;
     printf("\t\t\t");
-    for(pos =0 ; pos < len ; pos++)
+    for(posn =0 ; posn < len ; posn++)
     {
-        //print space
         printf(" ");
     }
-    //print message
+
     printf("%s",message);
 }
-//Head message
-void headm(const char *message)
+
+
+
+
+
+//top message
+void top_message(const char *message)
 {
     system("cls");
-    printMessageCenter(message);
+    printf("\t\t\t###########################################################################");
+    printf("\n\t\t\t############                                                   ############");
+    printf("\n\t\t\t############        Student Record Management System           ############");
+    printf("\n\t\t\t############                                                   ############");
+    printf("\n\t\t\t###########################################################################");
+    printf("\n\t\t\t---------------------------------------------------------------------------\n");
+    center_message(message);
     printf("\n\t\t\t----------------------------------------------------------------------------");
 }
-//Display message
-void welcomeMessage()
+
+
+
+//display message
+void display_message()
 {
     printf("\n\n\n\n\n");
     printf("\n\t\t\t  **-**-**-**-**-**-**-**-**-**-**-**-**-**-**-**-**-**-**\n");
@@ -71,17 +94,18 @@ void welcomeMessage()
     printf("\n\t\t\t        =               Student Record              =");
     printf("\n\t\t\t        =                 Management                =");
     printf("\n\t\t\t        =                   System                  =");
-    printf("\n\t\t\t        =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=");
+    printf("\n\t\t\t        =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n");
     printf("\n\t\t\t  **-**-**-**-**-**-**-**-**-**-**-**-**-**-**-**-**-**-**\n");
-    printf("\n\n\n\t\t\t Enter any key to continue.....");
+    printf("\n\n\n\t\t\t Press Any Key To Continue\n");
     getch();
 }
 
 
-//Validate name
-int isNameValid(const char *name)
+
+//checking name
+int val_name(const char *name)
 {
-    int validName = 1;
+    int v_n = 1;
     int len = 0;
     int index = 0;
     len = strlen(name);
@@ -89,175 +113,226 @@ int isNameValid(const char *name)
     {
         if(!(isalpha(name[index])) && (name[index] != '\n') && (name[index] != ' '))
         {
-            validName = 0;
+            v_n = 0;
             break;
         }
     }
-    return validName;
+    return v_n;
 }
 
 
-// Function to check leap year.
-//Function returns 1 if leap year
+//leap year checking
 int  leap(int year)
 {
     return (((year % 4 == 0) &&
              (year % 100 != 0)) ||
             (year % 400 == 0));
 }
-// returns 1 if given date is valid.
-int isValidDate(date *validDate)
+
+
+
+// date validation. returns 1 if valid
+int val_date(date *v_d)
 {
-    //check range of year,month and day
-    if (validDate->yyyy > MAX_Y ||
-            validDate->yyyy < MIN_Y)
+    //y,m,d range check
+    if (v_d->yyyy > MAX_Y ||
+            v_d->yyyy < MIN_Y)
         return 0;
-    if (validDate->mm < 1 || validDate->mm > 12)
+
+    if (v_d->mm < 1 || v_d->mm > 12)
         return 0;
-    if (validDate->dd < 1 || validDate->dd > 31)
+
+    if (v_d->dd < 1 || v_d->dd > 31)
         return 0;
-    //Handle feb days in leap year
-    if (validDate->mm == 2)
+
+    //handles leap years
+    if (v_d->mm == 2)
     {
-        if (leap(validDate->yyyy))
-            return (validDate->dd <= 29);
+        if (leap(v_d->yyyy))
+            return (v_d->dd <= 29);
         else
-            return (validDate->dd <= 28);
+            return (v_d->dd <= 28);
     }
-    //handle months which has only 30 days
-    if (validDate->mm == 4 || validDate->mm == 6 ||
-            validDate->mm == 9 || validDate->mm == 11)
-        return (validDate->dd <= 30);
+
+    //handles 30 day months
+    if (v_d->mm == 4 || v_d->mm == 6 ||
+            v_d->mm == 9 || v_d->mm == 11)
+        return (v_d->dd <= 30);
     return 1;
 }
-// Add student in list
-void addStudentInDataBase()
+
+
+
+
+
+//add student
+void add_student()
 {
-    student_info addStudentInfoInDataBase = {0};
+    student_info add_student_info = {0};
     FILE *fp = NULL;
     int status = 0;
     fp = fopen(FILE_NAME,"ab+");
+
+
     if(fp == NULL)
     {
         printf("File is not opened\n");
         exit(1);
     }
-    headm("ADD NEW Students");
+
+
+    top_message("Add New Students");
     printf("\n\n\t\t\tENTER YOUR DETAILS BELOW:");
     printf("\n\t\t\t---------------------------------------------------------------------------\n");
     printf("\n\t\t\tStudent ID  = ");
     fflush(stdin);
-    scanf("%u",&addStudentInfoInDataBase.student_id);
+    scanf("%u",&add_student_info.student_id);
+
+
+
     do
     {
-        printf("\n\t\t\tFather Name  = ");
+        printf("\n\t\t\tFirst Name  = ");
         fflush(stdin);
-        fgets(addStudentInfoInDataBase.first_name,MAX_FNAME,stdin);
-        status = isNameValid(addStudentInfoInDataBase.first_name);
+        fgets(add_student_info.first_name,MAX_FIRST_NAME,stdin);
+        status = val_name(add_student_info.first_name);
         if (!status)
         {
             printf("\n\t\t\tName contain invalid character. Please enter again.");
         }
     }
     while(!status);
+
+
+
     do
     {
-        printf("\n\t\t\tStudent Name  = ");
+        printf("\n\t\t\tLast Name  = ");
         fflush(stdin);
-        fgets(addStudentInfoInDataBase.last_name,MAX_LNAME,stdin);
-        status = isNameValid(addStudentInfoInDataBase.last_name);
+        fgets(add_student_info.last_name,MAX_LAST_NAME,stdin);
+        status = val_name(add_student_info.last_name);
         if (!status)
         {
             printf("\n\t\t\tName contain invalid character. Please enter again.");
         }
     }
     while(!status);
+
+
+
     do
     {
         printf("\n\t\t\tStudent Address  = ");
         fflush(stdin);
-        fgets(addStudentInfoInDataBase.student_address,MAX_FNAME,stdin);
-        status = isNameValid(addStudentInfoInDataBase.student_address);
+        fgets(add_student_info.address,MAX_FIRST_NAME,stdin);
+        status = val_name(add_student_info.address);
         if (!status)
         {
             printf("\n\t\t\tName contain invalid character. Please enter again.");
         }
     }
     while(!status);
+
+
+
     do
     {
         //get date year,month and day from user
         printf("\n\t\t\tEnter date in format (day/month/year): ");
-        scanf("%d/%d/%d",&addStudentInfoInDataBase.studentJoiningDate.dd,&addStudentInfoInDataBase.studentJoiningDate.mm,&addStudentInfoInDataBase.studentJoiningDate.yyyy);
+        scanf("%d/%d/%d",&add_student_info.joining_date.dd,&add_student_info.joining_date.mm,&add_student_info.joining_date.yyyy);
         //check date validity
-        status = isValidDate(&addStudentInfoInDataBase.studentJoiningDate);
+        status = val_date(&add_student_info.joining_date);
         if (!status)
         {
             printf("\n\t\t\tPlease enter a valid date.\n");
         }
     }
+
+
     while(!status);
-    fwrite(&addStudentInfoInDataBase,sizeof(addStudentInfoInDataBase), 1, fp);
+    fwrite(&add_student_info,sizeof(add_student_info), 1, fp);
     fclose(fp);
 }
-// search student
-void searchStudent()
+
+
+
+//search for student
+void student_search()
 {
     int found = 0;
-    int studentId =0;
-    student_info addStudentInfoInDataBase = {0};
+    int student_id =0;
+    student_info add_student_info = {0};
     FILE *fp = NULL;
     fp = fopen(FILE_NAME,"rb");
+
+
+
     if(fp == NULL)
     {
         printf("\n\t\t\tFile is not opened\n");
         exit(1);
     }
-    headm("SEARCH STUDENTS");
-    //put the control on student detail
+
+
+    top_message("Search for Students");
+
     if (fseek(fp,FILE_HEADER_SIZE,SEEK_SET) != 0)
     {
         fclose(fp);
-        printf("\n\t\t\tFacing issue while reading file\n");
+        printf("\n\t\t\tFacing issues while reading the file\n");
         exit(1);
     }
-    printf("\n\n\t\t\tEnter Student ID NO to search:");
+
+
+    printf("\n\n\t\t\tEnter Student ID No. to search:");
     fflush(stdin);
-    scanf("%u",&studentId);
-    while (fread (&addStudentInfoInDataBase, sizeof(addStudentInfoInDataBase), 1, fp))
+    scanf("%u",&student_id);
+
+
+    while (fread (&add_student_info, sizeof(add_student_info), 1, fp))
     {
-        if(addStudentInfoInDataBase.student_id == studentId)
+        if(add_student_info.student_id == student_id)
         {
             found = 1;
             break;
         }
     }
+
+
     if(found)
     {
-        printf("\n\t\t\tStudent id = %d\n",addStudentInfoInDataBase.student_id);
-        printf("\n\t\t\tStudent name = %s",addStudentInfoInDataBase.last_name);
-        printf("\t\t\tFather Name = %s",addStudentInfoInDataBase.first_name);
-        printf("\n\t\t\tStudent Address = %s",addStudentInfoInDataBase.student_address);
-        printf("\t\t\tStudent Admission date(day/month/year) =  (%d/%d/%d)",addStudentInfoInDataBase.studentJoiningDate.dd,
-               addStudentInfoInDataBase.studentJoiningDate.mm, addStudentInfoInDataBase.studentJoiningDate.yyyy);
+        printf("\n\t\t\tStudent ID = %d\n",add_student_info.student_id);
+        printf("\t\t\tFirst Name = %s",add_student_info.first_name);
+        printf("\n\t\t\tLast Name = %s",add_student_info.last_name);
+        printf("\n\t\t\tStudent Address = %s",add_student_info.address);
+        printf("\t\t\tStudent Admission date(day/month/year) =  (%d/%d/%d)",add_student_info.joining_date.dd,
+               add_student_info.joining_date.mm, add_student_info.joining_date.yyyy);
     }
+
+
     else
     {
         printf("\n\t\t\tNo Record");
     }
+
+
     fclose(fp);
     printf("\n\n\n\t\t\tPress any key to go to main menu.....");
     fflush(stdin);
     getchar();
+
 }
-// view students function
-void viewStudent()
+
+
+
+// view students
+void view_student()
 {
     int found = 0;
-    student_info addStudentInfoInDataBase = {0};
+    student_info add_student_info = {0};
     FILE *fp = NULL;
-    unsigned int countStudent = 1;
-    headm("VIEW STUDENT DETAILS");
+    unsigned int count_s = 1;
+    top_message("View Student Details");
     fp = fopen(FILE_NAME,"rb");
     if(fp == NULL)
     {
@@ -267,176 +342,218 @@ void viewStudent()
     if (fseek(fp,FILE_HEADER_SIZE,SEEK_SET) != 0)
     {
         fclose(fp);
-        printf("Facing issue while reading file\n");
+        printf("Facing issues while reading the file\n");
         exit(1);
     }
-    while (fread (&addStudentInfoInDataBase, sizeof(addStudentInfoInDataBase), 1, fp))
+    while (fread (&add_student_info, sizeof(add_student_info), 1, fp))
     {
-        printf("\n\t\t\tStudent Count = %d\n\n",countStudent);
-        printf("\t\t\tStudent id = %u\n",addStudentInfoInDataBase.student_id);
-        printf("\t\t\tStudent Name = %s",addStudentInfoInDataBase.last_name);
-        printf("\t\t\tFather Name = %s",addStudentInfoInDataBase.first_name);
-        printf("\t\t\tStudent Address = %s",addStudentInfoInDataBase.student_address);
-        printf("\t\t\tStudent Admission date(day/month/year) =  (%d/%d/%d)\n\n",addStudentInfoInDataBase.studentJoiningDate.dd,
-               addStudentInfoInDataBase.studentJoiningDate.mm, addStudentInfoInDataBase.studentJoiningDate.yyyy);
+        printf("\n\t\t\tNo. Of Students = %d\n\n",count_s);
+        printf("\t\t\tStudent ID = %u\n",add_student_info.student_id);
+        printf("\t\t\tStudent First Name = %s",add_student_info.first_name);
+        printf("\t\t\tStudent Last Name = %s",add_student_info.last_name);
+        printf("\t\t\tStudent Address = %s",add_student_info.address);
+        printf("\t\t\tStudent Admission Date(dd/mm/yyyy) =  (%d/%d/%d)\n\n",add_student_info.joining_date.dd,
+               add_student_info.joining_date.mm, add_student_info.joining_date.yyyy);
         found = 1;
-        ++countStudent;
+        ++count_s;
     }
+
+
     fclose(fp);
+
+
     if(!found)
     {
-        printf("\n\t\t\tNo Record");
+        printf("\n\t\t\tNo Records");
     }
-    printf("\n\n\t\t\tPress any key to go to main menu.....");
+
+
+    printf("\n\n\t\t\tPress Any Key To Go To Main Menu\n");
     fflush(stdin);
     getchar();
 }
-// Delete student entry
-void deleteStudent()
+
+
+// delete student entry
+void delete_student()
 {
     int found = 0;
-    int studentDelete = 0;
-    file_head fileHeaderInfo = {0};
-    student_info addStudentInfoInDataBase = {0};
+    int d_s = 0;
+    file_header fileHeaderInfo = {0};
+    student_info add_student_info = {0};
     FILE *fp = NULL;
     FILE *tmpFp = NULL;
-    headm("Delete Student Details");
+    top_message("Delete Student Details");
     fp = fopen(FILE_NAME,"rb");
+
+
     if(fp == NULL)
     {
         printf("File is not opened\n");
         exit(1);
     }
+
+
     tmpFp = fopen("tmp.bin","wb");
+
+
     if(tmpFp == NULL)
     {
         fclose(fp);
-        printf("File is not opened\n");
+        printf("File is Not Opened\n");
         exit(1);
     }
+
+
     fread (&fileHeaderInfo,FILE_HEADER_SIZE, 1, fp);
     fwrite(&fileHeaderInfo,FILE_HEADER_SIZE, 1, tmpFp);
-    printf("\n\t\t\tEnter Student ID NO. for delete:");
-    scanf("%d",&studentDelete);
-    while (fread (&addStudentInfoInDataBase, sizeof(addStudentInfoInDataBase), 1, fp))
+    printf("\n\t\t\tEnter Student ID No. For Delete:");
+    scanf("%d",&d_s);
+
+
+    while (fread (&add_student_info, sizeof(add_student_info), 1, fp))
     {
-        if(addStudentInfoInDataBase.student_id != studentDelete)
+        if(add_student_info.student_id != d_s)
         {
-            fwrite(&addStudentInfoInDataBase,sizeof(addStudentInfoInDataBase), 1, tmpFp);
+            fwrite(&add_student_info,sizeof(add_student_info), 1, tmpFp);
         }
         else
         {
             found = 1;
         }
     }
+
+
     (found)? printf("\n\t\t\tRecord deleted successfully....."):printf("\n\t\t\tRecord not found");
     fclose(fp);
     fclose(tmpFp);
     remove(FILE_NAME);
     rename("tmp.bin",FILE_NAME);
 }
-//function to update credential
-void updateCredential(void)
+
+
+//update function
+void update(void)
 {
-    file_head fileHeaderInfo = {0};
+    file_header fileHeaderInfo = {0};
     FILE *fp = NULL;
-    unsigned char userName[MAX_USER] = {0};
-    unsigned char password[MAX_PASS] = {0};
-    headm("Update Credential");
+    unsigned char userName[MAX_USERNAME] = {0};
+    unsigned char password[MAX_PASSWORD] = {0};
+    top_message("Update Credentials");
     fp = fopen(FILE_NAME,"rb+");
+
+
     if(fp == NULL)
     {
         printf("File is not opened\n");
         exit(1);
     }
+
+
     fread (&fileHeaderInfo,FILE_HEADER_SIZE, 1, fp);
+
+
     if (fseek(fp,0,SEEK_SET) != 0)
     {
         fclose(fp);
-        printf("\n\t\t\tFacing issue while updating password\n");
+        printf("\n\t\t\tFacing Issues While Updating Password\n");
         exit(1);
     }
-    printf("\n\n\t\t\tNew Username:");
+
+
+    printf("\n\n\t\t\tNew Username: ");
     fflush(stdin);
-    fgets(userName,MAX_USER,stdin);
-    printf("\n\n\t\t\tNew Password:");
+    fgets(userName,MAX_USERNAME,stdin);
+    printf("\n\n\t\t\tNew Password: ");
     fflush(stdin);
-    fgets(password,MAX_PASS,stdin);
+    fgets(password,MAX_PASSWORD,stdin);
     strncpy(fileHeaderInfo.username,userName,sizeof(userName));
     strncpy(fileHeaderInfo.password,password,sizeof(password));
     fwrite(&fileHeaderInfo,FILE_HEADER_SIZE, 1, fp);
     fclose(fp);
-    printf("\n\t\t\tYour Password has been changed successfully");
+    printf("\n\t\t\tYour Password Has Been Changed Successfully");
     printf("\n\t\t\ttLogin Again:");
     fflush(stdin);
     getchar();
     exit(1);
 }
+
+
+
+
 //Display menu
 void menu()
 {
     int choice = 0;
     do
     {
-        headm("MAIN MENU");
-        printf("\n\n\n\t\t\t1.Add Student");
-        printf("\n\t\t\t2.Search Student");
-        printf("\n\t\t\t3.View Student");
-        printf("\n\t\t\t4.Delete Student");
-        printf("\n\t\t\t5.Update Password");
+        top_message("Main Menu");
+        printf("\n\n\n\t\t\t1.Add A Student");
+        printf("\n\t\t\t2.Search For A Student");
+        printf("\n\t\t\t3.View A Student");
+        printf("\n\t\t\t4.Delete A Student");
+        printf("\n\t\t\t5.Update Credentials");
         printf("\n\t\t\t0.Exit");
         printf("\n\n\n\t\t\tEnter choice => ");
         scanf("%d",&choice);
         switch(choice)
         {
         case 1:
-            addStudentInDataBase();
+            add_student();
             break;
         case 2:
-            searchStudent();
+            student_search();
             break;
         case 3:
-            viewStudent();
+            view_student();
             break;
         case 4:
-            deleteStudent();
+            delete_student();
             break;
         case 5:
-            updateCredential();
+            update();
             break;
         case 0:
-            printf("\n\n\n\t\t\t\tThank you!!!\n\n\n\n\n");
+            printf("\n\n\n\t\t\t\tThank you\n\n\n\n\n");
             exit(1);
             break;
         default:
-            printf("\n\n\n\t\t\tINVALID INPUT!!! Try again...");
-        }                                            //Switch Ended
+            printf("\n\n\n\t\t\tInvalid Input. Try again\n");
+        }
     }
-    while(choice!=0);                                        //Loop Ended
+    while(choice!=0);
 }
-//login password
+
+
+//login
 void login()
 {
-    unsigned char userName[MAX_USER] = {0};
-    unsigned char password[MAX_PASS] = {0};
+    unsigned char userName[MAX_USERNAME] = {0};
+    unsigned char password[MAX_PASSWORD] = {0};
     int L=0;
-    file_head fileHeaderInfo = {0};
+    file_header fileHeaderInfo = {0};
     FILE *fp = NULL;
-    headm("Login");
+    top_message("Login");
     fp = fopen(FILE_NAME,"rb");
+
+
     if(fp == NULL)
     {
         printf("File is not opened\n");
         exit(1);
     }
+
+
     fread (&fileHeaderInfo,FILE_HEADER_SIZE, 1, fp);
     fclose(fp);
+
+
     do
     {
         printf("\n\n\n\t\t\t\tUsername:");
-        fgets(userName,MAX_USER,stdin);
+        fgets(userName,MAX_USERNAME,stdin);
         printf("\n\t\t\t\tPassword:");
-        fgets(password,MAX_PASS,stdin);
+        fgets(password,MAX_PASSWORD,stdin);
         if((!strcmp(userName,fileHeaderInfo.username)) && (!strcmp(password,fileHeaderInfo.password)))
         {
             menu();
@@ -447,17 +564,23 @@ void login()
             L++;
         }
     }
+
+
     while(L<=3);
+
+
     if(L>3)
     {
-        headm("Login Failed");
+        top_message("Login Failed");
         printf("\t\t\t\tSorry,Unknown User.");
         getch();
         system("cls");
     }
 }
-//Check file exist or not
-int isFileExists(const char *path)
+
+
+//checks if file exists
+int file_exists(const char *path)
 {
     // Try to open file
     FILE *fp = fopen(path, "rb");
@@ -475,10 +598,10 @@ void init()
 {
     FILE *fp = NULL;
     int status = 0;
-    const char defaultUsername[] ="aticleworld\n";
-    const char defaultPassword[] ="aticleworld\n";
-    file_head fileHeaderInfo = {0};
-    status = isFileExists(FILE_NAME);
+    const char defaultUsername[] ="admin\n";
+    const char defaultPassword[] ="admin\n";
+    file_header fileHeaderInfo = {0};
+    status = file_exists(FILE_NAME);
     if(!status)
     {
         //create the binary file
@@ -496,7 +619,7 @@ void init()
 int main()
 {
     init();
-    welcomeMessage();
+    display_message();
     login();
     return 0;
 }
