@@ -43,12 +43,13 @@ typedef struct
     char last_name[MAX_LAST_NAME];
     char address[MAX_ADDRESS];
     date joining_date;
+    char phone_number[100];
 } student_info;
 
 
 
 
-//top message
+//page name
 void center_message(const char* message)
 {
     int len =0;
@@ -161,6 +162,19 @@ int val_date(date *v_d)
     return 1;
 }
 
+int val_no(char number[100])
+{
+    int valno=1;
+    if((strlen(number)>10)||(strlen(number)<10)){
+        for(int i=0;i<10;i++){
+            valno=isdigit(number[i]);
+            if(!valno){
+                return 0;
+            }
+        }
+    }
+}
+
 
 
 
@@ -238,7 +252,7 @@ void add_student()
     do
     {
         //get date year,month and day from user
-        printf("\n\t\t\tEnter date in format (day/month/year): ");
+        printf("\n\t\t\tEnter date in format (dd/mm/yyyy): ");
         scanf("%d/%d/%d",&add_student_info.joining_date.dd,&add_student_info.joining_date.mm,&add_student_info.joining_date.yyyy);
         //check date validity
         status = val_date(&add_student_info.joining_date);
@@ -250,8 +264,22 @@ void add_student()
 
 
     while(!status);
+
+    do
+    {
+        printf("\n\t\t\tEnter the student phone number: ");
+        scanf("%s",&add_student_info.phone_number);
+        status=val_no(add_student_info.phone_number);
+        if(!status){
+            printf("\n\t\t\tPlease enter a valid phone number.\n");
+        }
+        
+
+    }
+    while(!status);
     fwrite(&add_student_info,sizeof(add_student_info), 1, fp);
     fclose(fp);
+
 }
 
 
@@ -307,6 +335,7 @@ void student_search()
         printf("\n\t\t\tStudent Address = %s",add_student_info.address);
         printf("\t\t\tStudent Admission date(day/month/year) =  (%d/%d/%d)",add_student_info.joining_date.dd,
                add_student_info.joining_date.mm, add_student_info.joining_date.yyyy);
+        printf("\t\t\tStudent Phone Number = %s",add_student_info.phone_number);
     }
 
 
@@ -354,6 +383,7 @@ void view_student()
         printf("\t\t\tStudent Address = %s",add_student_info.address);
         printf("\t\t\tStudent Admission Date(dd/mm/yyyy) =  (%d/%d/%d)\n\n",add_student_info.joining_date.dd,
                add_student_info.joining_date.mm, add_student_info.joining_date.yyyy);
+        printf("\t\t\tStudent Phone Number = %s",add_student_info.phone_number);
         found = 1;
         ++count_s;
     }
@@ -585,21 +615,23 @@ int file_exists(const char *path)
     // Try to open file
     FILE *fp = fopen(path, "rb");
     int status = 0;
-    // If file does not exists
+    // if file does not exists
     if (fp != NULL)
     {
         status = 1;
-        // File exists hence close file
+        // file exits
         fclose(fp);
     }
     return status;
 }
+
+
 void init()
 {
     FILE *fp = NULL;
     int status = 0;
-    const char defaultUsername[] ="admin\n";
-    const char defaultPassword[] ="admin\n";
+    const char default_username[] ="admin\n";
+    const char default_password[] ="admin\n";
     file_header fileHeaderInfo = {0};
     status = file_exists(FILE_NAME);
     if(!status)
@@ -608,14 +640,16 @@ void init()
         fp = fopen(FILE_NAME,"wb");
         if(fp != NULL)
         {
-            //Copy default password
-            strncpy(fileHeaderInfo.password,defaultPassword,sizeof(defaultPassword));
-            strncpy(fileHeaderInfo.username,defaultUsername,sizeof(defaultUsername));
+            //copies default password
+            strncpy(fileHeaderInfo.password,default_password,sizeof(default_password));
+            strncpy(fileHeaderInfo.username,default_username,sizeof(default_username));
             fwrite(&fileHeaderInfo,FILE_HEADER_SIZE, 1, fp);
             fclose(fp);
         }
     }
 }
+
+
 int main()
 {
     init();
